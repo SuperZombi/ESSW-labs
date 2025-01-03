@@ -94,8 +94,7 @@ class ChatFSM:
 		akinator.declare(character_facts)
 		akinator.run()
 
-		if akinator.response:
-			return akinator.response
+		if akinator.response: return akinator.response
 		return {"text": "Нажаль я не зміг вгадати твого персонажа 😢"}
 
 
