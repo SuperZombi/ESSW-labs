@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Genshin Impact Akinator</title>
+	<link rel="stylesheet" href="styles.css">
+	<script type='text/javascript' src='/eel.js'></script>
+</head>
+<body>
+	<h1 align="center">Genshin Impact Akinator</h1>
+	<div id="chat"></div>
+	<div align="center"><button id="new_chat">Новий чат</button></div>
+
+	<script type="text/javascript">
+		function scrollBottom(){
+			let chatBox = document.querySelector("#chat")
+			chatBox.scrollTop = chatBox.scrollHeight
+		}
+		function addMessage(message, author="user") {
+			let chatBox = document.querySelector("#chat")
+			let div = document.createElement("div")
+			div.className = "message"
+			div.setAttribute("from", author == "bot" ? "bot" : "user")
+			let text = document.createElement("span")
+			text.innerHTML = message
+			div.appendChild(text)
+			chatBox.appendChild(div)
+			return div
+		}
+		function createOption(key, text, image){
+			let div = document.createElement("div")
+			div.className = "option"
+			div.innerHTML = `<img src="images/${image}" title="${text}"/>`
+			return div
+		}
+		function addOptions(message, options) {
+			let optionsBox = document.createElement("div")
+			optionsBox.className = "options"
+			Object.entries(options).map(([key,val])=>{
+				let option = createOption(key, val.text, val.img)
+				optionsBox.appendChild(option)
+				option.onclick = _=>{
+					addMessage(val.text)
+					optionsBox.remove()
+					eel.process_message(key)(process_response)
+				}
+			})
+			message.appendChild(optionsBox)
+		}
+		function addImage(message, image){
+			let div = document.createElement("div")
+			div.className = "image"
+			div.innerHTML = `<img src="images/${image}"/>`
+			message.appendChild(div)
+		}
+
+		function process_response(resp){
+			let msg = addMessage(resp.text, 'bot');
+			if (resp.options){addOptions(msg, resp.options)}
+			else if (resp.img){addImage(msg, resp.img)}
+			setTimeout(_=>{scrollBottom()}, 1)
+		}
+
+		async function start_chat(){
+			await eel.new_chat()
+			document.querySelector("#chat").innerHTML = ""
+			eel.process_message()(process_response)
+		}
+		window.onload = _=>{
+			start_chat()
+			document.querySelector("#new_chat").onclick = start_chat
+		}
+	</script>
+</body>
+</html>
